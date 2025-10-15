@@ -1,0 +1,23 @@
+#MacOS files
+.DS_Store
+
+#Intellij files
+.idea/
+*.iml
+out/
+
+#Eclipse files
+.project
+.classpath
+.c9/settings/
+*.launch
+.settings/
+bin/
+
+# Maven files
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+
