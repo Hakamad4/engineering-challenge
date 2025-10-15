@@ -18,8 +18,8 @@ automaticamente** entre:
 - **Imobiliária (RealEstateAgency)**,
 - **Proprietário do imóvel (PropertyOwner)**.
 
-O objetivo é implementar o módulo que **processa pagamentos** e gera **lançamentos contábeis (Statements)** com *
-*contraprova (double-entry)**, garantindo integridade e possibilidade de processamento concorrente.
+O objetivo é implementar o módulo que **processa pagamentos** e gera **lançamentos contábeis (Statements)** com
+**contraprova (double-entry)**, garantindo integridade e possibilidade de processamento concorrente.
 Caso tenha dúvidas de como funciona a mecanica contábil, pesquise sobre "double-entry accounting".
 
 ## O que deve ser desenvolvido
