@@ -12,7 +12,7 @@ public class PaymentServiceTest {
     @Test
     void shouldGenerateBalancedLedgerEntries() {
         Payment payment = new Payment();
-        payment.setReferenceId("ALUGUEL-01");
+        payment.setExternalReference("ALUGUEL-01");
         payment.setAmount(new BigDecimal("3000.00"));
         // TODO: prepare scenario and execute
         assertTrue(true);

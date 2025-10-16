@@ -1,11 +1,11 @@
-# Desafio Técnico — Motor de Pagamentos e Extratos Imobiliários
+# Desafio Técnico — Processamento de Pagamentos
 
 Essa é a etapa técnica do processo seletivo da Morus.
 O objetivo é avaliar as suas habilidades de modelagem, design, implementação e testes.
 Não se preocupe em entregar tudo completo, mas sim em mostrar o seu raciocínio e qualidade de código.
 
 Esta é uma oportunidade para mostrar as suas habilidades técnicas e jeito de pensar.
-Sinta-se à vontade para fazer perguntas, implementar melhorias e ser criativo.
+Sinta-se à vontade para fazer perguntas, trazer questionamentos, implementar melhorias e ser criativo.
 
 Divirta-se! :)
 
@@ -25,7 +25,7 @@ Caso tenha dúvidas de como funciona a mecanica contábil, pesquise sobre "doubl
 ## O que deve ser desenvolvido
 
 1. Receber um pagamento (valor total).
-2. Calcular o split entre Morus, Imobiliária e Owner.
+2. Calcular o split entre Morus, Imobiliária e Proprietário.
 3. Gerar lançamentos contábeis de **débito e crédito** (com contrapartida).
 4. Atualizar saldos de contas.
 5. Garantir que o balanço esteja **zerado** (soma de débitos = créditos).
@@ -42,7 +42,7 @@ Pagamento: **R$ 3.000,00** (Imobiliária 10%, Morus 2%, Owner 88%)
 | 3  | Repasse de valores recebidos | Proprietário       | 2.640,00 | Repasse ao proprietário |
 | 4  | Repasse de valores recebidos | Morus Receita      | 60,00    | Taxa de plataforma      |
 
-### No extrato, a mecanica deve ser da seguinte forma:
+### No extrato, a mecânica de lançamentos deve ser da seguinte forma:
 
 | Data       | Descrição               | Conta              | Valor     |
 |------------|-------------------------|--------------------|-----------|
@@ -70,17 +70,17 @@ Sendo assim, o saldo da conta `Morus Recebimentos` volta a ser zero após o proc
 
 ## Entidades sugeridas
 
-#### (Modelagem previamente definida, mas pode ser ajustada caso você ache necessário)
+#### (Modelagem previamente definida, mas sinta-se livre para trazer novas abordagens)
 
 - `Account(id, name, balance, type[CLEARING_ACCOUNT, PLATFORM_REVENUE_ACCOUNT, REAL_ESTATE_AGENCY, PROPERTY_OWNER])`
 - `RealEstateAgency(id, name, accountId, feePercentage)`
-- `Owner(id, name, accountId)`
-- `Payment(id, referenceId, amount, status[PENDING, COMPLETED, FAILED], createdAt)`
+- `PropertyOwner(id, name, accountId)`
+- `Payment(id, externalReference, amount, status[PENDING, COMPLETED, FAILED], createdAt)`
 - `Statement(id, paymentId, accountId, counterpartyAccountId, type[DEBIT,CREDIT], amount, description, createdAt)`
 
 ## Regras de Split
 
-- Taxa da MorusBank: 2% (fixo sobre o valor total)
+- Taxa da Morus: 2% (fixo sobre o valor total)
 - Taxa da Imobiliária: definida pelo campo `feePercentage`
 - Repasse ao Proprietário: valor líquido restante
 
@@ -88,18 +88,26 @@ Sendo assim, o saldo da conta `Morus Recebimentos` volta a ser zero após o proc
 
 1. **Modelagem contábil coerente** (double-entry com contraprova).
 2. **Processamento de pagamento** (cálculo de splits e geração de lançamentos).
-3. **Balanço contábil** (débitos = créditos).
-4. **Rollback em falhas** (pagamento `FAILED` e nenhum lançamento parcial).
-5. **Testes automatizados** (cálculo, balanço e rollback).
+3. **Implementar uma operação de saque da conta do proprietário** (saque de saldo da conta do proprietário para uma
+   conta externa).
+   > **Atenção**: não é necessário implementar integração com sistemas externos, apenas a lógica de débito na conta do
+   proprietário e geração de lançamentos contábeis.
+4. **Rollback em caso de falhas** (pagamento `FAILED` e nenhum lançamento parcial).
+5. **Persistência** (banco de dados relacional H2).
+6. **Testes automatizados das operações** (pagamento, split, lançamentos e saldo).
+
+> Recomendamos o uso de uma ferramenta de ORM (Object-Relational Mapping). Caso opte por não usar, justifique no
+`README.md` suas motivações.
 
 ## Desafios bônus
 
 1. **Idempotência**: evitar reprocessamento do mesmo pagamento.
 2. **Racing conditions**: garantir que atualizações concorrentes de saldo sejam seguras.
-3. **Arredondamento**: distribuir centavos excedentes de forma justa.
+3. **Autenticação e autorização**: simular usuários e permissões.
 4. **Logs e auditoria**: registrar operações e saldo final por conta.
 5. **Performance em lote**: processar vários pagamentos mantendo integridade.
 6. **Validação de ledger**: `validateLedger()` que prova Débitos = Créditos global.
+7. **Error handling**: mecanismo para rastrear, notificar e reprocessar pagamentos `FAILED`.
 
 ## Tecnologias sugeridas
 
@@ -122,7 +130,7 @@ Sendo assim, o saldo da conta `Morus Recebimentos` volta a ser zero após o proc
 - Seja criativo e mostre as suas habilidades. Caso não consiga completar tudo, não tem problema. Queremos ver o seu
   raciocínio e qualidade do código, não necessariamente tudo implementado. :)
 - O uso de IA é permitido e incentivado, porém, lembre-se de que o código é seu e você deve entender claramente o que
-  está a ser feito.
+  está implementado.
 
 **Boa sorte!**
 

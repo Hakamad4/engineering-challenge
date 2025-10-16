@@ -5,10 +5,10 @@ import java.time.LocalDateTime;
 
 public class Payment {
 
-    public enum Status {COMPLETED, FAILED}
+    public enum Status {PENDING, COMPLETED, FAILED}
 
     private Long id;
-    private String referenceId;
+    private String externalReference;
     private BigDecimal amount;
     private Status status;
     private LocalDateTime createdAt;
@@ -21,12 +21,12 @@ public class Payment {
         this.id = id;
     }
 
-    public String getReferenceId() {
-        return referenceId;
+    public String getExternalReference() {
+        return externalReference;
     }
 
-    public void setReferenceId(String referenceId) {
-        this.referenceId = referenceId;
+    public void setExternalReference(String externalReference) {
+        this.externalReference = externalReference;
     }
 
     public BigDecimal getAmount() {
