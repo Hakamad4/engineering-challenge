@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 
 public class Account {
 
-    public enum AccountType {CLEARING_ACCOUNT, PLATFORM_REVENUE_ACCOUNT, REAL_ESTATE_AGENCY, PROPERTY_OWNER}
+    public enum AccountType {PLATFORM_REVENUE, REAL_ESTATE_AGENCY, PROPERTY_OWNER}
 
     private Long id;
     private String name;

@@ -5,13 +5,9 @@ import java.time.LocalDateTime;
 
 public class Statement {
 
-    public enum Type {DEBIT, CREDIT}
-
     private Long id;
     private Long paymentId;
     private Long accountId;
-    private Long counterpartyAccountId;
-    private Type type;
     private BigDecimal amount;
     private String description;
     private LocalDateTime createdAt;
@@ -38,22 +34,6 @@ public class Statement {
 
     public void setAccountId(Long accountId) {
         this.accountId = accountId;
-    }
-
-    public Long getCounterpartyAccountId() {
-        return counterpartyAccountId;
-    }
-
-    public void setCounterpartyAccountId(Long counterpartyAccountId) {
-        this.counterpartyAccountId = counterpartyAccountId;
-    }
-
-    public Type getType() {
-        return type;
-    }
-
-    public void setType(Type type) {
-        this.type = type;
     }
 
     public BigDecimal getAmount() {

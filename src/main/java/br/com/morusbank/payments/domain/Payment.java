@@ -9,6 +9,8 @@ public class Payment {
 
     private Long id;
     private String externalReference;
+    private Long realEstateAgencyId;
+    private Long propertyOwnerId;
     private BigDecimal amount;
     private Status status;
     private LocalDateTime createdAt;
@@ -27,6 +29,22 @@ public class Payment {
 
     public void setExternalReference(String externalReference) {
         this.externalReference = externalReference;
+    }
+
+    public Long getRealEstateAgencyId() {
+        return realEstateAgencyId;
+    }
+
+    public void setRealEstateAgencyId(Long realEstateAgencyId) {
+        this.realEstateAgencyId = realEstateAgencyId;
+    }
+
+    public Long getPropertyOwnerId() {
+        return propertyOwnerId;
+    }
+
+    public void setPropertyOwnerId(Long propertyOwnerId) {
+        this.propertyOwnerId = propertyOwnerId;
     }
 
     public BigDecimal getAmount() {

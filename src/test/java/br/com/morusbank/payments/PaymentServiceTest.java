@@ -22,9 +22,4 @@ public class PaymentServiceTest {
     void shouldRollbackOnFailure() {
         assertTrue(true);
     }
-
-    @Test
-    void shouldProcessConcurrentlyWithoutCorruptingBalances() {
-        assertTrue(true);
-    }
 }

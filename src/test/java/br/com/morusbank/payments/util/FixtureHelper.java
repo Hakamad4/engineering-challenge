@@ -1,4 +1,3 @@
-
 package br.com.morusbank.payments.util;
 
 import br.com.morusbank.payments.domain.Account;
@@ -15,10 +14,9 @@ public class FixtureHelper {
 
     public static List<Account> createDefaultAccounts() {
         return List.of(
-            createAccount(1L, "MorusBank Recebimentos", Account.AccountType.CLEARING_ACCOUNT, new BigDecimal("0.00")),
-            createAccount(2L, "MorusBank Receita", Account.AccountType.PLATFORM_REVENUE_ACCOUNT, new BigDecimal("0.00")),
-            createAccount(3L, "Imobiliária Alfa", Account.AccountType.REAL_ESTATE_AGENCY, new BigDecimal("0.00")),
-            createAccount(4L, "João da Silva (Proprietário)", Account.AccountType.PROPERTY_OWNER, new BigDecimal("0.00"))
+                createAccount(2L, "Morus Receita", Account.AccountType.PLATFORM_REVENUE, new BigDecimal("0.00")),
+                createAccount(3L, "Imobiliária Alfa", Account.AccountType.REAL_ESTATE_AGENCY, new BigDecimal("0.00")),
+                createAccount(4L, "João da Silva (Proprietário)", Account.AccountType.PROPERTY_OWNER, new BigDecimal("0.00"))
         );
     }
 
@@ -35,6 +33,7 @@ public class FixtureHelper {
         var owner = new PropertyOwner();
         owner.setId(20L);
         owner.setName("João da Silva");
+        owner.setRealEstateAgencyId(10L);
         owner.setAccountId(4L);
         return owner;
     }

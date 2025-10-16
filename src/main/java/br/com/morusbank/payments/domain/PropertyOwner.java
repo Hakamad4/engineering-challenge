@@ -5,6 +5,7 @@ public class PropertyOwner {
     private Long id;
     private String name;
     private Long accountId;
+    private Long realEstateAgencyId;
 
     public Long getId() {
         return id;
@@ -28,5 +29,13 @@ public class PropertyOwner {
 
     public void setAccountId(Long accountId) {
         this.accountId = accountId;
+    }
+
+    public Long getRealEstateAgencyId() {
+        return realEstateAgencyId;
+    }
+
+    public void setRealEstateAgencyId(Long realEstateAgencyId) {
+        this.realEstateAgencyId = realEstateAgencyId;
     }
 }

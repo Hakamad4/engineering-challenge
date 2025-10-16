@@ -1,138 +1,216 @@
-# Desafio Técnico — Processamento de Pagamentos
+# 💸 Morus Engineering Challenge — Payments & Statements API
 
-Essa é a etapa técnica do processo seletivo da Morus.
-O objetivo é avaliar as suas habilidades de modelagem, design, implementação e testes.
-Não se preocupe em entregar tudo completo, mas sim em mostrar o seu raciocínio e qualidade de código.
+Bem-vindo ao desafio técnico da Morus!  
+Aqui você vai implementar a lógica central de **processamento de pagamentos e repasses automáticos** de uma plataforma
+que conecta **imobiliárias, proprietários e locatários**.
 
-Esta é uma oportunidade para mostrar as suas habilidades técnicas e jeito de pensar.
-Sinta-se à vontade para fazer perguntas, trazer questionamentos, implementar melhorias e ser criativo.
+O desafio mede a sua capacidade de projetar um sistema **consistente, transacional e idempotente**, capaz de lidar com
+múltiplos participantes recebendo partes de um mesmo pagamento.
 
-Divirta-se! :)
+---
 
-## Contexto
+## 🧩 Contexto
 
-A Morus processa pagamentos de aluguéis e taxas imobiliárias. Quando um pagamento é recebido, ele deve ser **distribuído
-automaticamente** entre:
+A Morus atua como uma fintech do setor imobiliário e uma de suas funcionalidades é receber pagamentos de aluguel
+feitos por locatários e repassar automaticamente os valores para os proprietários e imobiliárias.
+Quando um locatário paga um aluguel, esse valor precisa ser **recebido pela plataforma** e **repassado automaticamente**
+para os participantes envolvidos na operação em uma conta digital da Morus.
 
-- **Morus** (taxa de plataforma),
-- **Imobiliária (RealEstateAgency)**,
-- **Proprietário do imóvel (PropertyOwner)**.
+- **Imobiliária** – recebe uma taxa de administração (por exemplo, 10%)
+- **Proprietário do imóvel (Owner)** – recebe o valor líquido do aluguel
+- **Morus (plataforma)** – retém uma pequena taxa de serviço (por exemplo, 2%)
 
-O objetivo é implementar o módulo que **processa pagamentos** e gera **lançamentos contábeis (Statements)** com
-**contraprova (double-entry)**, garantindo integridade e possibilidade de processamento concorrente.
-Caso tenha dúvidas de como funciona a mecanica contábil, pesquise sobre "double-entry accounting".
+Sua missão é construir a API que processa esse pagamento e registra os **lançamentos (Statements)** que representam o
+repasse entre contas internas.
 
-## O que deve ser desenvolvido
+---
 
-1. Receber um pagamento (valor total).
-2. Calcular o split entre Morus, Imobiliária e Proprietário.
-3. Gerar lançamentos contábeis de **débito e crédito** (com contrapartida).
-4. Atualizar saldos de contas.
-5. Garantir que o balanço esteja **zerado** (soma de débitos = créditos).
-6. Permitir processamento simultâneo de múltiplos pagamentos.
+## 🏗️ Base do Projeto
 
-## Exemplo contábil completo
+O projeto inicial já contém:
 
-Pagamento: **R$ 3.000,00** (Imobiliária 10%, Morus 2%, Owner 88%)
+- `Account`: representa uma conta digital (com `id`, `name`, `type`, `balance`, etc.);
+    - Cada conta tem um `AccountType` representando o tipo de participante:
+        - `PLATFORM_REVENUE` (conta da Morus)
+        - `REAL_ESTATE_AGENCY` (conta da imobiliária)
+        - `PROPERTY_OWNER` (conta do proprietário)
+- `Payment`: representa o pagamento recebido;
+- `PropertyOwner`: representa o proprietário do imóvel;
+- `RealEstateAgency`: representa a imobiliária;
+- `Statement`: representa um lançamento no extrato de uma conta;
 
-| Nº | Descrição                    | Conta Crédito      | Valor    | Descrição               |
-|----|------------------------------|--------------------|----------|-------------------------|
-| 1  | Origem externa               | Morus Recebimentos | 3.000,00 | Pagamento recebido      |
-| 2  | Repasse de valores recebidos | Imobiliária        | 300,00   | Comissão imobiliária    |
-| 3  | Repasse de valores recebidos | Proprietário       | 2.640,00 | Repasse ao proprietário |
-| 4  | Repasse de valores recebidos | Morus Receita      | 60,00    | Taxa de plataforma      |
+Você pode criar novas classes, DTOs, atributos, eventos ou estratégias conforme achar necessário, desde que mantenha a
+coesão e clareza do projeto.
+Não se limite ao código inicial — sinta-se livre para refatorar e melhorar a estrutura do projeto caso julgue
+necessário.
 
-### No extrato, a mecânica de lançamentos deve ser da seguinte forma:
+---
 
-| Data       | Descrição               | Conta              | Valor     |
-|------------|-------------------------|--------------------|-----------|
-| 2024-01-01 | Pagamento recebido      | Morus Recebimentos | +3.000,00 |
-| 2024-01-01 | Comissão imobiliária    | Morus Recebimentos | -300,00   |
-| 2024-01-01 | Comissão imobiliária    | Imobiliária        | +300,00   |
-| 2024-01-01 | Repasse ao proprietário | Morus Recebimentos | -2.640,00 |
-| 2024-01-01 | Repasse ao proprietário | Proprietário       | +2.640,00 |
-| 2024-01-01 | Taxa de plataforma      | Morus Recebimentos | -60,00    |
-| 2024-01-01 | Taxa de plataforma      | Morus Receita      | +60,00    |
+## 🚀 Desafio
 
-Sendo assim, o saldo da conta `Morus Recebimentos` volta a ser zero após o processamento do pagamento.
+Implementar um endpoint `/payments` que recebe um pagamento e gera os lançamentos (Statements) necessários para
+distribuir o valor entre os participantes, garantindo:
 
-### Resumo do exemplo
+- **Idempotência**: o mesmo pagamento não pode ser processado mais de uma vez.
+- **Atomicidade**: se qualquer parte do processo falhar, todo o pagamento deve ser revertido.
+- **Integridade**: A soma de todos os lançamentos deve ser igual ao valor do pagamento.
+- **Rastreamento**: Cada lançamento no extrato deve referenciar o pagamento original para auditoria.
 
-- **Pagamento**: R$ 3.000,00
-- **Split**:
-    - Morus: 2% = R$ 60,00
-    - Imobiliária: 10% = R$ 300,00
-    - Proprietário: 88% = R$ 2.640,00
-- **Lançamentos**: 7 (1 débito inicial + 3 créditos + 3 débitos de contrapartida)
-- Caso o valor do pagamento seja negativo ou zero, o pagamento deve ser rejeitado com erro.
+### Regras de negócio
 
-**Invariantes**: Total Débitos = Total Créditos = 3.000,00. Qualquer falha deve gerar rollback e `Payment = FAILED`.
+1. A plataforma Morus **recebe o pagamento** de R$ 3.000,00.
+2. O sistema deve **distribuir automaticamente** o valor entre as contas dos participantes:
+    - Exemplo: para um pagamento de R$ 3.000,00:
+        - **10%** para a conta da Imobiliária. (Esse percentual está definido no cadastro da
+          imobiliária);
+        - **2%** para a conta da Morus. (Essa taxa é fixa para todos os pagamentos);
+        - **88%** para a conta do Proprietário do imóvel;
+3. Cada repasse deve ser registrado no extrato (Statement) com a identificação do pagamento recebido.
+4. O conjunto de lançamentos deve manter **integridade total** (A soma de todos os lançamentos deve ser igual ao valor
+   do pagamento).
+5. O mesmo pagamento não pode ser processados duas vezes (**idempotência obrigatória**).
+6. A operação deve ser **atômica** — se um repasse falhar, todo o pagamento é revertido.
 
-## Entidades sugeridas
+---
 
-#### (Modelagem previamente definida, mas sinta-se livre para trazer novas abordagens)
+### 💰 Exemplo de comportamento esperado
 
-- `Account(id, name, balance, type[CLEARING_ACCOUNT, PLATFORM_REVENUE_ACCOUNT, REAL_ESTATE_AGENCY, PROPERTY_OWNER])`
-- `RealEstateAgency(id, name, accountId, feePercentage)`
-- `PropertyOwner(id, name, accountId)`
-- `Payment(id, externalReference, amount, status[PENDING, COMPLETED, FAILED], createdAt)`
-- `Statement(id, paymentId, accountId, counterpartyAccountId, type[DEBIT,CREDIT], amount, description, createdAt)`
+**Requisição**
 
-## Regras de Split
+```bash
+POST /payments
+{
+  "externalReference": "PAY-202501",
+  "amount": 3000.00,
+  "realEstateAgencyId": "IMB-001",
+  "propertyOwnerId": "P-001",
+  "description": "Pagamento de aluguel de janeiro"
+}
+```
 
-- Taxa da Morus: 2% (fixo sobre o valor total)
-- Taxa da Imobiliária: definida pelo campo `feePercentage`
-- Repasse ao Proprietário: valor líquido restante
+**Resposta**
 
-## Desafios técnicos
+```bash
+HTTP 201 Created
+{
+  "externalReference": "PAY-202501",
+  "amount": 3000.00,
+  "realEstateAgencyId": "IMB-001",
+  "propertyOwnerId": "P-001",
+  "description": "Pagamento de aluguel de janeiro",
+  "createdAt": "2025-01-15T10:32:11"
+}
+```
 
-1. **Modelagem contábil coerente** (double-entry com contraprova).
-2. **Processamento de pagamento** (cálculo de splits e geração de lançamentos).
-3. **Implementar uma operação de saque da conta do proprietário** (saque de saldo da conta do proprietário para uma
-   conta externa).
-   > **Atenção**: não é necessário implementar integração com sistemas externos, apenas a lógica de débito na conta do
-   proprietário e geração de lançamentos contábeis.
-4. **Rollback em caso de falhas** (pagamento `FAILED` e nenhum lançamento parcial).
-5. **Persistência** (banco de dados relacional H2).
-6. **Testes automatizados das operações** (pagamento, split, lançamentos e saldo).
+**Representação simbólica dos lançamentos gerados**
 
-> Recomendamos o uso de uma ferramenta de ORM (Object-Relational Mapping). Caso opte por não usar, justifique no
-`README.md` suas motivações.
+| payment    | account          |  amount | description                          | createdAt           |
+|------------|------------------|--------:|--------------------------------------|---------------------|
+| PAY-202501 | IMB-001          |  300.00 | Recebimento de taxa de administração | 2025-01-15T10:32:11 |
+| PAY-202501 | P-001            | 2640.00 | Repasse de aluguel                   | 2025-01-15T10:32:11 |
+| PAY-202501 | PLATFORM_REVENUE |   60.00 | Receita da plataforma                | 2025-01-15T10:32:11 |
 
-## Desafios bônus
+Ao final do processo, o extrato de cada conta deve refletir os lançamentos e os seus respectivos saldos atualizados.
 
-1. **Idempotência**: evitar reprocessamento do mesmo pagamento.
-2. **Racing conditions**: garantir que atualizações concorrentes de saldo sejam seguras.
-3. **Autenticação e autorização**: simular usuários e permissões.
-4. **Logs e auditoria**: registrar operações e saldo final por conta.
-5. **Performance em lote**: processar vários pagamentos mantendo integridade.
-6. **Validação de ledger**: `validateLedger()` que prova Débitos = Créditos global.
-7. **Error handling**: mecanismo para rastrear, notificar e reprocessar pagamentos `FAILED`.
+---
 
-## Tecnologias sugeridas
+## ⚙️ Requisitos obrigatórios
 
-- Java 21 ou superior, Spring Boot 3.x, Maven, H2 e JUnit 5.
-- É permitido o uso de bibliotecas adicionais, mas evite bibliotecas que abstraiam a lógica principal (ex: frameworks
-  contábeis).
-- Caso queira, use outras tecnologias ou outra linguagem, mas justifique as suas motivações no `README.md` do seu
-  projeto.
+1. Implementar o endpoint `/payments` com a lógica de distribuição e geração dos lançamentos.
+2. Criar `Statement` para todos os repasses e taxas.
+3. Garantir **idempotência** (mesmo pagamento não gera lançamentos duplicados).
+4. Garantir **atomicidade** (rollback total em caso de falha).
+5. Implementar testes automatizados com no mínimo 85% de cobertura (casos de sucesso e falha).
+6. Explicar decisões técnicas no `README.md`.
 
-## Entrega
+---
 
-- Crie um .zip e envie o seu código para o e-mail [contato@morusbank.com.br](mailto:contato@morusbank.com.br) (sem
-  arquivos binários, somente o código-fonte).
-- `README.md` descrevendo arquitetura e decisões.
+## 🧠 Requisitos bônus (não obrigatórios, porém, se implementados, serão considerados na avaliação)
 
-## Informações importantes
+- **Endpoint `/statements/{accountId}`:** retornar o extrato completo de uma conta.
+- **Criação de um endpoint para simular saques:** permitir que uma conta faça o cashout de um valor, gerando um
+  lançamento negativo e refletindo no saldo da conta.
+- **Validações adicionais:** verificar se as contas existem, se o valor é positivo, se o proprietário está vinculado à
+  imobiliária, etc.
+- **Tratamento de erros:** respostas claras e apropriadas para falhas.
+- **Testes de integração:** além dos testes unitários.
+- **Paginação e filtros** nos extratos.
+- **Documentação da API:** usando Swagger/OpenAPI.
+- **Autenticação e autorização:** proteger os endpoints.
+- **Métricas:** expor métricas de pagamentos processados, falhas, etc
+- **Processamento assíncronos:** Processar pagamentos de forma assíncrona.
 
-- Prazo: 7 dias a partir do recebimento.
-- Em caso de dúvidas, não hesite em perguntar através do e-mail contato@morusbank.com.br
-- Seja criativo e mostre as suas habilidades. Caso não consiga completar tudo, não tem problema. Queremos ver o seu
-  raciocínio e qualidade do código, não necessariamente tudo implementado. :)
-- O uso de IA é permitido e incentivado, porém, lembre-se de que o código é seu e você deve entender claramente o que
+---
+
+## 🧪 Testes
+
+Crie testes cobrindo:
+
+- Pagamento processado com sucesso;
+- Tentativa de duplicação (idempotência);
+- Falha durante o processo (rollback total);
+
+---
+
+## 🧰 Tecnologias sugeridas
+
+- Java 21+
+- Spring Boot 3+
+- Maven
+- H2 Database (ou outro relacional)
+- JUnit / Mockito
+- Docker
+
+Você pode usar Lombok, Flyway, Docker Compose ou qualquer ferramenta útil — apenas documente as suas escolhas.
+
+---
+
+## ▶️ Como executar
+
+```bash
+# Clonar o repositório
+git clone https://github.com/morusbank/engineering-challenge.git
+cd engineering-challenge
+
+# Executar a aplicação
+mvn spring-boot:run
+```
+
+---
+
+## 📦 Entrega
+
+1. Crie um zip da pasta do projeto (sem a pasta `target` e arquivos desnecessários) e envie para o e-mail
+   [contato@morusbank.com.br](mailto:contato@morusbank.com.br) informando no assunto "Desafio Técnico -
+   Engenharia - [Seu Nome]".
+2. Inclua no seu `README.md`:
+    - Visão geral do projeto com uma breve descrição da sua solução e principais decisões;
+    - Como executar;
+    - Quaisquer melhorias que você faria se tivesse mais tempo.
+
+---
+
+## 💬 Dicas finais
+
+* O objetivo não é complexidade — é **clareza e robustez**.
+* Queremos ver como você estrutura um fluxo de negócio crítico com simplicidade e coesão.
+* Um código limpo e transacional vale mais do que qualquer abstração sofisticada.
+* O uso de padrões de projeto (Design Patterns) é bem-vindo, mas **não exagere**.
+* Seja criativo e mostre as suas habilidades. Caso não consiga completar tudo, não tem problema. Queremos ver o seu
+  raciocínio e qualidade do código, não esperamos uma solução perfeita.
+* O uso de IA é permitido e incentivado, porém, lembre-se de que o código é seu e você deve entender claramente o que
   está implementado.
 
-**Boa sorte!**
+Você tem **7 dias corridos** para completar o desafio a partir do recebimento deste e-mail, mas se terminar antes,
+sinta-se à vontade para enviar.
+
+---
+
+> Caso opte por implementar o desafio utilizando outra linguagem, não tem problema, mas **explique as suas escolhas**
+> no README do seu projeto e coloque as instruções de como executar a aplicação.
+
+**Boa sorte!**  
+A equipe da Morus está animada para ver como você transforma lógica de repasse em um sistema confiável e elegante 🚀
 
 >
 > Any fool can write code that a computer can understand. Good programmers write code that humans can understand.
