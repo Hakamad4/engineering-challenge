@@ -185,7 +185,7 @@ mvn spring-boot:run
    Engenharia - [Seu Nome]".
 2. Inclua no seu `README.md`:
     - Visão geral do projeto com uma breve descrição da sua solução e principais decisões;
-    - Como executar;
+    - Os passos necessários para rodar a aplicação e validar os cenários solicitados no desafio;
     - Quaisquer melhorias que você faria se tivesse mais tempo.
 
 ---
