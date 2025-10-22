@@ -1,18 +1,35 @@
 package br.com.morusbank.payments.controller;
 
-import org.springframework.web.bind.annotation.RestController;
+import br.com.morusbank.payments.domain.exception.PaymentException;
+import br.com.morusbank.payments.domain.request.PaymentRequest;
+import br.com.morusbank.payments.domain.response.PaymentResponse;
+import br.com.morusbank.payments.service.PaymentService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequestMapping("/api/v1/payments")
 public class PaymentsController {
 
-    // Here you would define endpoints to handle payment processing. For example:
-    // @PostMapping("/payments")
-    // public ResponseEntity<PaymentResponse> processPayment(@RequestBody PaymentRequest request) {
-    //     // Payment processing logic goes here
-    //     return ResponseEntity.ok(new PaymentResponse(...));
-    // }
+    private final PaymentService paymentService;
 
-    // Optional endpoints (e.g. GET payment status, GET account balances) can live in separate controllers.
-    // They are not required for core functionality; primary focus is the domain model (accounts, statement, payments).
+    public PaymentsController(PaymentService paymentService) {
+        this.paymentService = paymentService;
+    }
+
+    @PostMapping
+    public ResponseEntity<?> processPayment(@RequestBody PaymentRequest request) {
+        try {
+            PaymentResponse paymentResponse = paymentService.processPayment(request);
+            return ResponseEntity
+                    .status(HttpStatus.CREATED)
+                    .body(paymentResponse);
+        } catch (PaymentException e) {
+            return ResponseEntity
+                    .internalServerError()
+                    .body(e.getErrorResponse());
+        }
+    }
 
 }

@@ -1,8 +1,8 @@
 package br.com.morusbank.payments.util;
 
-import br.com.morusbank.payments.domain.Account;
-import br.com.morusbank.payments.domain.PropertyOwner;
-import br.com.morusbank.payments.domain.RealEstateAgency;
+import br.com.morusbank.payments.domain.entity.Account;
+import br.com.morusbank.payments.domain.entity.PropertyOwner;
+import br.com.morusbank.payments.domain.entity.RealEstateAgency;
 
 import java.math.BigDecimal;
 import java.util.List;

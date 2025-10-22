@@ -1,10 +1,22 @@
-package br.com.morusbank.payments.domain;
+package br.com.morusbank.payments.domain.entity;
 
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "property_owners")
 public class PropertyOwner {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "name")
     private String name;
+
+    @Column(name = "account_id")
     private Long accountId;
+
+    @Column(name = "real_estate_agency_id")
     private Long realEstateAgencyId;
 
     public Long getId() {
