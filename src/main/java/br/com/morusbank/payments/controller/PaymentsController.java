@@ -19,17 +19,11 @@ public class PaymentsController {
     }
 
     @PostMapping
-    public ResponseEntity<?> processPayment(@RequestBody PaymentRequest request) {
-        try {
-            PaymentResponse paymentResponse = paymentService.processPayment(request);
-            return ResponseEntity
-                    .status(HttpStatus.CREATED)
-                    .body(paymentResponse);
-        } catch (PaymentException e) {
-            return ResponseEntity
-                    .internalServerError()
-                    .body(e.getErrorResponse());
-        }
+    public ResponseEntity<PaymentResponse> processPayment(@RequestBody PaymentRequest request) throws PaymentException {
+        PaymentResponse paymentResponse = paymentService.processPayment(request);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(paymentResponse);
     }
 
 }

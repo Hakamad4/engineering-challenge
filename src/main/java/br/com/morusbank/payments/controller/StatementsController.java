@@ -21,19 +21,12 @@ public class StatementsController {
     }
 
     @GetMapping("/{accountId}")
-    public ResponseEntity<?> getAccountStatements(
+    public ResponseEntity<AccountStatementResponse> getAccountStatements(
             @PathVariable("accountId") Integer accountId,
             @RequestParam(required = false, defaultValue = "0") Integer page,
-            @RequestParam(required = false, defaultValue = "20") Integer size) {
+            @RequestParam(required = false, defaultValue = "20") Integer size) throws AccountNotFoundException {
 
-        try {
-            AccountStatementResponse response = statementService.getAccountStatements(Long.valueOf(accountId), page, size);
-            return ResponseEntity.ok(response);
-        } catch (PaymentException e) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(e.getErrorResponse());
-        }
+        return ResponseEntity.ok(statementService.getAccountStatements(Long.valueOf(accountId), page, size));
     }
 
     @GetMapping("/{accountId}/filter")
@@ -42,17 +35,10 @@ public class StatementsController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
             @RequestParam(required = false, defaultValue = "0") Integer page,
-            @RequestParam(required = false, defaultValue = "20") Integer size) {
+            @RequestParam(required = false, defaultValue = "20") Integer size) throws AccountNotFoundException {
 
-        try {
-            AccountStatementResponse response = statementService.getAccountStatementsByDateRange(
-                    Long.valueOf(accountId), startDate, endDate, page, size
-            );
-            return ResponseEntity.ok(response);
-        } catch (AccountNotFoundException e) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(e.getErrorResponse());
-        }
+        return ResponseEntity.ok(statementService.getAccountStatementsByDateRange(
+                Long.valueOf(accountId), startDate, endDate, page, size
+        ));
     }
 }
