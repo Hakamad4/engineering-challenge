@@ -204,7 +204,7 @@ public class StatementsIntegrationTest {
 
         MvcResult result = mockMvc.perform(get("/api/v1/statements/{accountId}", nonExistentAccountId)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").exists())
                 .andReturn();
 
@@ -291,7 +291,7 @@ public class StatementsIntegrationTest {
                         .param("startDate", startDate.toString())
                         .param("endDate", endDate.toString())
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").exists())
                 .andReturn();
 
