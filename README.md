@@ -8,6 +8,26 @@ O desafio mede a sua capacidade de projetar um sistema **consistente, transacion
 múltiplos participantes recebendo partes de um mesmo pagamento.
 
 ---
+## 🔍 Visão Geral do Projeto
+Para esse projeto optei trocar para o mysql, só por motivos de familiaridade.
+Eu tentei deixar o mais simples possivel o projeto, sem gerar muita complexidade mas deixando o codigo mais claro possivel também.
+Por isso para a atomicidade, eu usei apenas o @Transacional, mas em um caso real, eu poderia usar o Kafta para receber
+os statements e processar os pagamentos, assim poderia criar uma deadletter queue para receber os pagamentos com falha
+e processar depois ou realizar estorno.
+
+A api deveria estar autenticada e autorizada, para isso eu teria usado o spring security e o JWT,
+assim gerando um contexto do usuario que está realizando o pagamento e a partir disso eu pegaria
+as informações do propertyOwner e realEstateAgency do contexto ao inves de receber da api.
+Acredito que o pagamento seja só uma ponta da empresa, então creio que teriamos um Api Gateway para
+fazer o roteamento dos serviços. (A não ser que a estrutura seja algo como um monolito, o que apesar de muitos julgarem,
+acho que é uma forte solução para empresas que estão no inicio).
+
+Usei a aquitetura em camadas, pois acho que é uma arquitetura mais padrão.
+
+E por ultimo, no build, eu usaria o native build, para redução do cold start, assim poderia ser utilizado um lambda
+ou até mesmo um container que não precisasse ficar rodando 24h.
+
+---
 
 ## 🧩 Contexto
 
